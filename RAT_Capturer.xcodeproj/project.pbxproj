@@ -14,6 +14,8 @@
 		3D7F9EE029960C99002E4AB6 /* RAT_Capturer.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 3D7F9EDE29960C99002E4AB6 /* RAT_Capturer.xcdatamodeld */; };
 		3D7F9EE229960C9A002E4AB6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3D7F9EE129960C9A002E4AB6 /* Assets.xcassets */; };
 		3D7F9EE529960C9A002E4AB6 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3D7F9EE329960C9A002E4AB6 /* LaunchScreen.storyboard */; };
+		3D7F9EED29960DA1002E4AB6 /* CapturerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D7F9EEC29960DA1002E4AB6 /* CapturerViewController.swift */; };
+		3D7F9EEF29960E43002E4AB6 /* detectRATV2.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = 3D7F9EEE29960E43002E4AB6 /* detectRATV2.mlmodel */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -26,6 +28,8 @@
 		3D7F9EE129960C9A002E4AB6 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		3D7F9EE429960C9A002E4AB6 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		3D7F9EE629960C9A002E4AB6 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		3D7F9EEC29960DA1002E4AB6 /* CapturerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CapturerViewController.swift; sourceTree = "<group>"; };
+		3D7F9EEE29960E43002E4AB6 /* detectRATV2.mlmodel */ = {isa = PBXFileReference; lastKnownFileType = file.mlmodel; path = detectRATV2.mlmodel; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,9 +62,11 @@
 		3D7F9ED429960C99002E4AB6 /* RAT_Capturer */ = {
 			isa = PBXGroup;
 			children = (
+				3D7F9EEE29960E43002E4AB6 /* detectRATV2.mlmodel */,
 				3D7F9ED529960C99002E4AB6 /* AppDelegate.swift */,
 				3D7F9ED729960C99002E4AB6 /* SceneDelegate.swift */,
 				3D7F9ED929960C99002E4AB6 /* ViewController.swift */,
+				3D7F9EEC29960DA1002E4AB6 /* CapturerViewController.swift */,
 				3D7F9EDB29960C99002E4AB6 /* Main.storyboard */,
 				3D7F9EE129960C9A002E4AB6 /* Assets.xcassets */,
 				3D7F9EE329960C9A002E4AB6 /* LaunchScreen.storyboard */,
@@ -144,7 +150,9 @@
 				3D7F9EDA29960C99002E4AB6 /* ViewController.swift in Sources */,
 				3D7F9EE029960C99002E4AB6 /* RAT_Capturer.xcdatamodeld in Sources */,
 				3D7F9ED629960C99002E4AB6 /* AppDelegate.swift in Sources */,
+				3D7F9EEF29960E43002E4AB6 /* detectRATV2.mlmodel in Sources */,
 				3D7F9ED829960C99002E4AB6 /* SceneDelegate.swift in Sources */,
+				3D7F9EED29960DA1002E4AB6 /* CapturerViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -294,11 +302,14 @@
 				DEVELOPMENT_TEAM = 8FCNH268N4;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = RAT_Capturer/Info.plist;
+				INFOPLIST_KEY_NSCameraUsageDescription = "We need to access your camera to scan and take photos of the tests";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "We need to access your microphone for voice control purposes";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -322,11 +333,14 @@
 				DEVELOPMENT_TEAM = 8FCNH268N4;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = RAT_Capturer/Info.plist;
+				INFOPLIST_KEY_NSCameraUsageDescription = "We need to access your camera to scan and take photos of the tests";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "We need to access your microphone for voice control purposes";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
