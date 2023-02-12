@@ -266,7 +266,7 @@ class CapturerViewController: ViewController {
 
         counter += 1
         //Only process every 3rd frame
-        if counter % 3 != 0{
+        if counter % 20 != 0{
             return
         }
         
