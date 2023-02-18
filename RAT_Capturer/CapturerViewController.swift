@@ -20,6 +20,11 @@ class CapturerViewController: ViewController {
     //Test detection requests
     private var requests = [VNRequest]()
     
+    //C and T detection requests
+    private var ctRequests = [VNRequest]()
+    
+    //Pos/Neg requests
+    private var interpretationReq = [VNRequest]()
     
     //Text recognition request
     lazy var textDetectionRequest: VNRecognizeTextRequest = {
@@ -103,6 +108,41 @@ class CapturerViewController: ViewController {
         
         let modelName = "detectRATV2"
         
+        //Load the Corresponding ML file
+        guard let modelURL = Bundle.main.url(forResource: modelName, withExtension: "mlmodelc") else {
+            return NSError(domain: "VisionObjectRecognitionViewController", code: -1, userInfo: [NSLocalizedDescriptionKey: "Model file is missing"])
+        }
+        do {
+            let visionModel = try VNCoreMLModel(for: MLModel(contentsOf: modelURL))
+            //This is the model that is being ran and the call back method once the results have been processed
+            let objectRecognition = VNCoreMLRequest(model: visionModel, completionHandler: { (request, error) in
+                DispatchQueue.main.async(execute: {
+                    // perform all the UI updates on the main queue
+                    if let results = request.results {
+                        self.drawVisionRequestResults(results)
+                    }
+                    
+                })
+            })
+            self.requests = [objectRecognition]
+        } catch let error as NSError {
+            print("Model loading went wrong: \(error)")
+        }
+        
+        setupCTVision()
+        setupPosNegVision()
+        
+        return error
+    }
+    
+    //MARK: Detecting Test Functions
+    @discardableResult
+    func setupCTVision() -> NSError? {
+        // Setup Vision parts
+        let error: NSError! = nil
+        
+        let modelName = "CTFinderV1"
+        
         //Output this frame
         //Get file manager
         //Get the paths
@@ -123,20 +163,84 @@ class CapturerViewController: ViewController {
                 DispatchQueue.main.async(execute: {
                     // perform all the UI updates on the main queue
                     if let results = request.results {
-                        self.drawVisionRequestResults(results)
-                    }
-                    
-                    if request.results?.count == 1 {
-                        self.currentFrameCIImage?.saveImage(self.imageCounter.description + ".png", inDirectoryURL: documentsDirectory)
-                        self.imageCounter += 1
+                        var CCounter = 0
+                        var TCounter = 0
+                        //Loop through every result
+
+                        for observation in results where observation is VNRecognizedObjectObservation {
+                            guard let objectObservation = observation as? VNRecognizedObjectObservation else {
+                                continue
+                            }
+                            
+                            if objectObservation.labels[0].identifier == "C" {
+                                CCounter += 1
+                            } else if objectObservation.labels[0].identifier == "T" {
+                                TCounter += 1
+                            }
+                        }
+                        
+                        if CCounter == 1 || TCounter == 1 {
+                            self.hardImpact.impactOccurred()
+                            self.lastImapctTime = Date()
+                            //Depending on the distance, we give intervaled feedback
+                            self.currentFrameCIImage = self.currentFrameCIImage?.oriented(.right)
+                            
+                            self.currentFrameCIImage?.saveImage(self.imageCounter.description + ".png", inDirectoryURL: documentsDirectory)
+                            
+                            self.imageCounter += 1
+                            
+                        }
+                        
+                        print("Found \(CCounter)C and \(TCounter)T")
                     }
                     
                 })
             })
-            self.requests = [objectRecognition]
+            self.ctRequests = [objectRecognition]
         } catch let error as NSError {
             print("Model loading went wrong: \(error)")
         }
+        
+        return error
+    }
+    
+    @discardableResult
+    func setupPosNegVision() -> NSError? {
+        // Setup Vision parts
+        let error: NSError! = nil
+        
+        
+        let modelName = "results_classification"
+        
+        //Load the Corresponding ML file
+        guard let modelURL = Bundle.main.url(forResource: modelName, withExtension: "mlmodelc") else {
+            return NSError(domain: "VisionObjectRecognitionViewController", code: -1, userInfo: [NSLocalizedDescriptionKey: "Model file is missing"])
+        }
+        do {
+            let visionModel = try VNCoreMLModel(for: MLModel(contentsOf: modelURL))
+            //This is the model that is being ran and the call back method once the results have been processed
+            let classificationRecognition = VNCoreMLRequest(model: visionModel, completionHandler: { (request, error) in
+                DispatchQueue.main.async(execute: {
+                    // perform all the UI updates on the main queue
+                    guard let observations = request.results as? [VNClassificationObservation] else {
+                        // Image classifiers, like MobileNet, only produce classification observations.
+                        // However, other Core ML model types can produce other observations.
+                        // For example, a style transfer model produces `VNPixelBufferObservation` instances.
+                        print("VNRequest produced the wrong result type: \(type(of: request.results)).")
+                        return
+                    }
+                    for observation in observations {
+                        print("Result: \(observation.identifier) Confidence: \(observation.confidence)")
+                    }
+                    
+                    
+                })
+            })
+            self.interpretationReq = [classificationRecognition]
+        } catch let error as NSError {
+            print("Model loading went wrong: \(error)")
+        }
+        
         
         return error
     }
@@ -182,9 +286,18 @@ class CapturerViewController: ViewController {
             let topLabelObservation = objectObservation.labels[0]
             //Object bounds is a tuple with the boundaries of the object
             let objectBounds = VNImageRectForNormalizedRect(objectObservation.boundingBox, Int(bufferSize.width), Int(bufferSize.height))
+            
+            let shapeLayer = self.createRoundedRectLayerWithBounds(objectBounds)
+            
+            let textLayer = self.createTextSubLayerInBounds(objectBounds,
+                                                            identifier: topLabelObservation.identifier,
+                                                            confidence: topLabelObservation.confidence)
+            shapeLayer.addSublayer(textLayer)
+            detectionOverlay.addSublayer(shapeLayer)
 
+            
             //If there is only one result
-            if results.count == 1 {
+            if results.count == 1 && (Double(objectBounds.width) / Double(objectBounds.height)) >= 2.8{
                 
                 //Output this frame
                 //Get file manager
@@ -215,38 +328,25 @@ class CapturerViewController: ViewController {
                 
                 
                 let context = CIContext(options: nil)
-                    if let cgImage = context.createCGImage(croppedImage, from: croppedImage.extent) {
-                        //This is called every frame
-                        let handler = VNImageRequestHandler(cgImage: cgImage, orientation: exifOrientation)
+                if let cgImage = context.createCGImage(croppedImage, from: croppedImage.extent) {
+                    //This is called every frame
+                    let handler = VNImageRequestHandler(cgImage: cgImage, orientation: exifOrientation)
+                    
+                    do {
                         
-                        do {
-                            
-                            //Do the text recognition requests
-                            try handler.perform([self.textDetectionRequest])
-                            
-                        } catch {
-                            print(error)
-                        }
+                        //Do the text recognition requests
+                        try handler.perform(self.ctRequests)
+                        
+                    } catch {
+                        print(error)
                     }
-                
-                //Depending on the distance, we give intervaled feedback
-                if Date().timeIntervalSince(lastImapctTime) > (0.5){
-                    hardImpact.impactOccurred()
-                    lastImapctTime = Date()
                 }
+                
                 
                 
                 
             }
             
-            
-            let shapeLayer = self.createRoundedRectLayerWithBounds(objectBounds)
-            
-            let textLayer = self.createTextSubLayerInBounds(objectBounds,
-                                                            identifier: topLabelObservation.identifier,
-                                                            confidence: topLabelObservation.confidence)
-            shapeLayer.addSublayer(textLayer)
-            detectionOverlay.addSublayer(shapeLayer)
             
         }
         self.updateLayerGeometry()
@@ -266,7 +366,7 @@ class CapturerViewController: ViewController {
 
         counter += 1
         //Only process every 3rd frame
-        if counter % 20 != 0{
+        if counter % 3 != 0{
             return
         }
         
