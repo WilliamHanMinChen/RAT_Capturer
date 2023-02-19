@@ -187,7 +187,18 @@ class CapturerViewController: ViewController {
                             //Depending on the distance, we give intervaled feedback
                             self.currentFrameCIImage = self.currentFrameCIImage?.oriented(.right)
                             
-                            self.currentFrameCIImage?.saveImage(self.imageCounter.description + ".png", inDirectoryURL: documentsDirectory)
+                            //Crop the image to only test window
+                            let startX = (currentFrameCIImage?.extent.origin.x)! + (currentFrameCIImage?.extent.size.width)! * 0.15
+                            let startY = (currentFrameCIImage?.extent.origin.y)! + (currentFrameCIImage?.extent.size.height)! * 0.40
+                            
+                            let width = (currentFrameCIImage?.extent.size.width)! * 0.7
+                            let height = ((currentFrameCIImage?.extent.size.height)!) * 0.18
+                            
+                            let cropRect = CGRect(x: startX, y: CGFloat(startY), width: width, height: height)
+                            
+                            let newCIImage = currentFrameCIImage?.cropped(to: cropRect)
+                            
+                            newCIImage!.saveImage(self.imageCounter.description + ".png", inDirectoryURL: documentsDirectory)
                             self.hardImpact.impactOccurred()
                             self.imageCounter += 1
                             
@@ -372,7 +383,7 @@ class CapturerViewController: ViewController {
 
         counter += 1
         //Only process every 3rd frame
-        if counter % 3 != 0{
+        if counter % 1 != 0{
             return
         }
         
