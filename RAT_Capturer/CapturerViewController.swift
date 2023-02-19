@@ -61,6 +61,9 @@ class CapturerViewController: ViewController {
     
     let ringerChangedSoundID: SystemSoundID = 1103
     
+    //Object bounds
+    var objectBounds: CGRect?
+    
     
     
     override func viewDidLoad() {
@@ -160,7 +163,7 @@ class CapturerViewController: ViewController {
             let visionModel = try VNCoreMLModel(for: MLModel(contentsOf: modelURL))
             //This is the model that is being ran and the call back method once the results have been processed
             let objectRecognition = VNCoreMLRequest(model: visionModel, completionHandler: { (request, error) in
-                DispatchQueue.main.async(execute: {
+                DispatchQueue.main.async(execute: { [self] in
                     // perform all the UI updates on the main queue
                     if let results = request.results {
                         var CCounter = 0
@@ -179,16 +182,18 @@ class CapturerViewController: ViewController {
                             }
                         }
                         
-                        if CCounter == 1 || TCounter == 1 {
-                            self.hardImpact.impactOccurred()
+                        if (CCounter == 1 || TCounter == 1) && (Double(self.objectBounds!.width) / Double(objectBounds!.height)) >= 2.8{
                             self.lastImapctTime = Date()
                             //Depending on the distance, we give intervaled feedback
                             self.currentFrameCIImage = self.currentFrameCIImage?.oriented(.right)
                             
                             self.currentFrameCIImage?.saveImage(self.imageCounter.description + ".png", inDirectoryURL: documentsDirectory)
-                            
+                            self.hardImpact.impactOccurred()
                             self.imageCounter += 1
                             
+                        } else {
+                            //Havnt found one do a soft imapct
+                            self.softImpact.impactOccurred()
                         }
                         
                         print("Found \(CCounter)C and \(TCounter)T")
@@ -297,8 +302,9 @@ class CapturerViewController: ViewController {
 
             
             //If there is only one result
-            if results.count == 1 && (Double(objectBounds.width) / Double(objectBounds.height)) >= 2.8{
-                
+            if results.count == 1 {
+                //Update our object bounds
+                self.objectBounds = objectBounds
                 //Output this frame
                 //Get file manager
                 //Get the paths
