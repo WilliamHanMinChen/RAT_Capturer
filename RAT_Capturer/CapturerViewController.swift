@@ -189,10 +189,10 @@ class CapturerViewController: ViewController {
                             
                             //Crop the image to only test window
                             let startX = (currentFrameCIImage?.extent.origin.x)! + (currentFrameCIImage?.extent.size.width)! * 0.15
-                            let startY = (currentFrameCIImage?.extent.origin.y)! + (currentFrameCIImage?.extent.size.height)! * 0.40
+                            let startY = (currentFrameCIImage?.extent.origin.y)! + (currentFrameCIImage?.extent.size.height)! * 0.37
                             
                             let width = (currentFrameCIImage?.extent.size.width)! * 0.7
-                            let height = ((currentFrameCIImage?.extent.size.height)!) * 0.18
+                            let height = ((currentFrameCIImage?.extent.size.height)!) * 0.3
                             
                             let cropRect = CGRect(x: startX, y: CGFloat(startY), width: width, height: height)
                             
